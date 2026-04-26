@@ -4,10 +4,48 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>crypto-dashboard</title>
+    <meta
+      name="description"
+      content="Track live cryptocurrency and stock prices with real-time charts."
+    />
+
+    <title>CryptoDash – Real-Time Market Tracker</title>
+
+    <!-- CSS (use absolute paths for Vite stability) -->
+    <link rel="stylesheet" href="/src/css/base.css" />
+    <link rel="stylesheet" href="/src/css/layout.css" />
+    <link rel="stylesheet" href="/src/css/components.css" />
+    <link rel="stylesheet" href="/src/css/dashboard.css" />
   </head>
+
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <!-- Header -->
+    <div id="header"></div>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+      <h1>CryptoDash</h1>
+
+      <input
+        type="text"
+        id="search"
+        placeholder="Search for Bitcoin, Ethereum..."
+      />
+
+      <div id="results"></div>
+
+      <section id="favorites">
+        <h2>My Favorites</h2>
+        <ul id="favList"></ul>
+      </section>
+
+      <canvas id="priceChart"></canvas>
+    </main>
+
+    <!-- Footer -->
+    <div id="footer"></div>
+
+    <!-- JS -->
+    <script type="module" src="/src/js/main.js"></script>
   </body>
 </html>

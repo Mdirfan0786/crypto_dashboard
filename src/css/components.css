@@ -1,0 +1,64 @@
+/* HEADER */
+.header {
+  background: var(--header-bg);
+  color: var(--header-text);
+  padding: 1rem 2rem;
+  box-shadow: var(--shadow);
+}
+
+.header .container {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.main_content {
+  display: flex;
+  align-items: center;
+}
+
+.header nav a {
+  color: var(--header-text);
+  margin-left: 1.5rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.header nav a:hover {
+  opacity: 0.7;
+}
+
+/* Dark mode toggle button */
+#themeToggle {
+  margin-left: 1.5rem;
+  padding: 0.5rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--card-bg);
+  color: var(--text-color);
+  transition: 0.3s;
+}
+
+#themeToggle:hover {
+  opacity: 0.8;
+}
+
+/* FOOTER */
+.footer {
+  background: var(--header-bg);
+  color: var(--header-text);
+  text-align: center;
+  padding: 1.5rem;
+  margin-top: 3rem;
+  font-size: 0.9rem;
+  border-top: 1px solid var(--border-color);
+}
