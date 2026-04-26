@@ -1,17 +1,19 @@
-/* HEADER */
+/* ================= HEADER ================= */
+
 .header {
-  background: var(--header-bg);
-  color: var(--header-text);
-  padding: 1rem 2rem;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
   box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header .container {
-  max-width: 1100px;
-  margin: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1rem;
 }
 
 .logo {
@@ -19,46 +21,101 @@
   font-weight: bold;
 }
 
+.logo span {
+  color: var(--primary);
+}
+
+/* ================= NAV ================= */
+
+nav a {
+  margin-left: 1.5rem;
+  font-weight: 500;
+  color: var(--text-color);
+  position: relative;
+  transition: 0.3s;
+}
+
+nav a:hover {
+  color: var(--primary);
+}
+
+/* underline hover effect */
+nav a::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  left: 0;
+  bottom: -4px;
+  background: var(--primary);
+  transition: 0.3s;
+}
+
+nav a:hover::after {
+  width: 100%;
+}
+
+/* ================= HEADER RIGHT ================= */
+
 .main_content {
   display: flex;
   align-items: center;
 }
 
-.header nav a {
-  color: var(--header-text);
-  margin-left: 1.5rem;
-  text-decoration: none;
-  font-weight: 500;
-  transition: 0.3s;
-}
+/* ================= DARK MODE BUTTON ================= */
 
-.header nav a:hover {
-  opacity: 0.7;
-}
-
-/* Dark mode toggle button */
 #themeToggle {
-  margin-left: 1.5rem;
-  padding: 0.5rem 0.8rem;
+  margin-left: 1rem;
+  padding: 0.4rem 0.7rem;
   border: none;
   border-radius: 6px;
-  cursor: pointer;
-  background: var(--card-bg);
+  background: var(--border-color);
   color: var(--text-color);
+  cursor: pointer;
   transition: 0.3s;
+  text-align: center;
 }
 
 #themeToggle:hover {
-  opacity: 0.8;
+  background: var(--primary);
+  color: #fff;
 }
 
-/* FOOTER */
+/* ================= FOOTER ================= */
+
 .footer {
-  background: var(--header-bg);
-  color: var(--header-text);
-  text-align: center;
-  padding: 1.5rem;
   margin-top: 3rem;
-  font-size: 0.9rem;
+  padding: 1.5rem;
+  text-align: center;
+  background: var(--card-bg);
   border-top: 1px solid var(--border-color);
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+/* ================= FAVORITES ================= */
+
+#favList li {
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+#favList li:hover {
+  transform: translateX(5px);
+}
+
+/* ================= REMOVE BUTTON ================= */
+
+.remove-btn {
+  background: var(--danger);
+  color: white;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.remove-btn:hover {
+  opacity: 0.8;
 }
