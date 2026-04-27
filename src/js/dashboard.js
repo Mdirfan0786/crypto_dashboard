@@ -148,6 +148,29 @@ async function renderChart(coin, data) {
   });
 }
 
+// top gainer/loser
+function renderTicker(coins) {
+  const track = document.getElementById("tickerTrack");
+  if (!track) return;
+
+  track.innerHTML = coins
+    .slice(0, 10)
+    .map((coin) => {
+      const change = coin.price_change_percentage_24h ?? 0;
+
+      return `
+        <div class="ticker-item">
+          <span class="symbol">${coin.symbol.toUpperCase()}</span>
+          <span>$${coin.current_price.toLocaleString()}</span>
+          <span class="${change > 0 ? "green" : "red"}">
+            ${change > 0 ? "▲" : "▼"} ${change.toFixed(2)}%
+          </span>
+        </div>
+      `;
+    })
+    .join("");
+}
+
 // COINS GRID
 async function renderCoins() {
   const grid = document.getElementById("coinsGrid");
@@ -160,6 +183,8 @@ async function renderCoins() {
     if (allCoins.length === 0) {
       allCoins = await fetchCoins();
     }
+
+    renderTicker(allCoins);
 
     grid.innerHTML = allCoins
       .map((coin) => {
