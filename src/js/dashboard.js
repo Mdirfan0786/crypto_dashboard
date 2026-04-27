@@ -134,6 +134,16 @@ async function renderChart(coin, data) {
 
   const isPositive = data.market_data.price_change_percentage_24h > 0;
 
+  // gradient effect
+  const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+  if (isPositive) {
+    gradient.addColorStop(0, "rgba(34,197,94,0.4)");
+    gradient.addColorStop(1, "rgba(34,197,94,0)");
+  } else {
+    gradient.addColorStop(0, "rgba(239,68,68,0.4)");
+    gradient.addColorStop(1, "rgba(239,68,68,0)");
+  }
+
   chart = new Chart(ctx, {
     type: "line",
     data: {
@@ -141,9 +151,37 @@ async function renderChart(coin, data) {
       datasets: [
         {
           data: history.prices.map((p) => p[1]),
-          borderColor: isPositive ? "green" : "red",
+          borderColor: isPositive ? "#22c55e" : "#ef4444",
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.4, // smooth curve
+          pointRadius: 0, // remove dots
+          borderWidth: 2,
         },
       ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#0f172a",
+          borderColor: "#334155",
+          borderWidth: 1,
+          titleColor: "#fff",
+          bodyColor: "#cbd5f5",
+        },
+      },
+      scales: {
+        x: {
+          ticks: { color: "#94a3b8" },
+          grid: { display: false },
+        },
+        y: {
+          ticks: { color: "#94a3b8" },
+          grid: { color: "rgba(255,255,255,0.05)" },
+        },
+      },
     },
   });
 }
