@@ -28,7 +28,7 @@ async function init() {
   // default bitcoin
   setTimeout(() => {
     loadDefaultCoin(results);
-  }, 500);
+  }, 1000);
 
   // SEARCH
   search.addEventListener("keydown", async (e) => {
@@ -287,7 +287,8 @@ async function renderCoins() {
         // FAVORITE
         if (favBtn) {
           const coinId = favBtn.dataset.id;
-          const favs = loadFavorites();
+
+          let favs = loadFavorites();
 
           if (favs.includes(coinId)) {
             removeFavorite(coinId);
@@ -295,8 +296,20 @@ async function renderCoins() {
             saveFavorite(coinId);
           }
 
+          favs = loadFavorites();
+
           renderFavorites();
-          updateCoinUI(coinId);
+
+          const icon = favBtn.querySelector("i");
+
+          if (favs.includes(coinId)) {
+            favBtn.classList.add("active");
+            icon.className = "fa-solid fa-star";
+          } else {
+            favBtn.classList.remove("active");
+            icon.className = "fa-regular fa-star";
+          }
+
           return;
         }
 
@@ -318,23 +331,6 @@ async function renderCoins() {
     grid.innerHTML = "Failed to load coins";
   } finally {
     hideLoader();
-  }
-}
-
-// UPDATE SINGLE CARD
-function updateCoinUI(coinId) {
-  const card = document.querySelector(`[data-id="${coinId}"]`);
-  if (!card) return;
-
-  const btn = card.querySelector(".fav-btn");
-  const favs = loadFavorites();
-
-  if (favs.includes(coinId)) {
-    btn.classList.add("active");
-    btn.innerHTML = `<i class="fa-solid fa-star"></i>`;
-  } else {
-    btn.classList.remove("active");
-    btn.innerHTML = `<i class="fa-regular fa-star"></i>`;
   }
 }
 
