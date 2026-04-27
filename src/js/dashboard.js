@@ -54,11 +54,22 @@ function init() {
       return;
     }
 
-    const li = e.target.closest("li");
-    if (li) {
-      const data = await fetchCoin(li.dataset.id);
-      renderResult(data, results);
-      renderChart(li.dataset.id, data);
+    const chip = e.target.closest(".fav-chip");
+
+    if (chip) {
+      const coinId = chip.dataset.id;
+
+      try {
+        const data = await fetchCoin(coinId);
+        const results = document.getElementById("results");
+
+        renderResult(data, results);
+        renderChart(coinId, data);
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (err) {
+        console.error(err);
+      }
     }
   });
 }
@@ -234,18 +245,18 @@ function renderFavorites() {
   const favs = loadFavorites();
 
   if (!favs.length) {
-    favList.innerHTML = "<li>No favorites yet</li>";
+    favList.innerHTML = "<p>No favorites yet</p>";
     return;
   }
 
   favList.innerHTML = favs
     .map(
       (f) => `
-        <li data-id="${f}">
-          ${f}
-          <button class="remove-btn" data-id="${f}">x</button>
-        </li>
-      `,
+      <div class="fav-chip" data-id="${f}">
+        <span>${f.toUpperCase()}</span>
+        <button class="remove-btn" data-id="${f}">×</button>
+      </div>
+    `,
     )
     .join("");
 }
