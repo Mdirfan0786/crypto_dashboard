@@ -154,8 +154,8 @@ async function renderChart(coin, data) {
           borderColor: isPositive ? "#22c55e" : "#ef4444",
           backgroundColor: gradient,
           fill: true,
-          tension: 0.4, // smooth curve
-          pointRadius: 0, // remove dots
+          tension: 0.4,
+          pointRadius: 0,
           borderWidth: 2,
         },
       ],
