@@ -17,14 +17,20 @@ document.addEventListener("DOMContentLoaded", () => {
   init();
 });
 
-function init() {
+async function init() {
   const search = document.getElementById("search");
   const results = document.getElementById("results");
   const favList = document.getElementById("favList");
 
   renderFavorites();
-  renderCoins();
+  await renderCoins();
 
+  // default bitcoin
+  setTimeout(() => {
+    loadDefaultCoin(results);
+  }, 500);
+
+  // SEARCH
   search.addEventListener("keydown", async (e) => {
     if (e.key === "Enter") {
       const coin = search.value.trim().toLowerCase();
@@ -32,8 +38,6 @@ function init() {
 
       showLoader();
       results.innerHTML = "";
-
-      results.innerHTML = `<div class="spinner"></div>`;
 
       try {
         const data = await fetchCoin(coin);
@@ -47,6 +51,7 @@ function init() {
     }
   });
 
+  // FAVORITES CLICK
   favList.addEventListener("click", async (e) => {
     if (e.target.classList.contains("remove-btn")) {
       removeFavorite(e.target.dataset.id);
@@ -61,8 +66,6 @@ function init() {
 
       try {
         const data = await fetchCoin(coinId);
-        const results = document.getElementById("results");
-
         renderResult(data, results);
         renderChart(coinId, data);
 
@@ -74,10 +77,27 @@ function init() {
   });
 }
 
+// DEFAULT COIN
+async function loadDefaultCoin(results) {
+  try {
+    showLoader();
+
+    const data = await fetchCoin("bitcoin");
+    renderResult(data, results);
+    renderChart("bitcoin", data);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    hideLoader();
+  }
+}
+
+// FORMAT
 function formatNumber(num) {
   return Number(num).toLocaleString("en-IN");
 }
 
+// RESULT UI
 function renderResult(data, results) {
   const usd = data.market_data.current_price.usd;
   const inr = convertToINR(usd);
@@ -105,6 +125,7 @@ function renderResult(data, results) {
   };
 }
 
+// CHART
 async function renderChart(coin, data) {
   const history = await fetchHistory(coin);
   const ctx = document.getElementById("priceChart").getContext("2d");
@@ -121,16 +142,13 @@ async function renderChart(coin, data) {
         {
           data: history.prices.map((p) => p[1]),
           borderColor: isPositive ? "green" : "red",
-          tension: 0.3,
         },
       ],
-    },
-    options: {
-      plugins: { legend: { display: false } },
     },
   });
 }
 
+// COINS GRID
 async function renderCoins() {
   const grid = document.getElementById("coinsGrid");
   if (!grid) return;
@@ -143,9 +161,7 @@ async function renderCoins() {
       allCoins = await fetchCoins();
     }
 
-    const coins = allCoins;
-
-    grid.innerHTML = coins
+    grid.innerHTML = allCoins
       .map((coin) => {
         const change = coin.price_change_percentage_24h ?? 0;
         const favs = loadFavorites();
@@ -205,6 +221,7 @@ async function renderCoins() {
       grid.addEventListener("click", async (e) => {
         const favBtn = e.target.closest(".fav-btn");
 
+        // FAVORITE
         if (favBtn) {
           const coinId = favBtn.dataset.id;
           const favs = loadFavorites();
@@ -216,10 +233,11 @@ async function renderCoins() {
           }
 
           renderFavorites();
-          renderCoins();
+          updateCoinUI(coinId);
           return;
         }
 
+        // CARD CLICK
         const card = e.target.closest(".coin-card");
         if (card) {
           const data = await fetchCoin(card.dataset.id);
@@ -240,6 +258,24 @@ async function renderCoins() {
   }
 }
 
+// UPDATE SINGLE CARD
+function updateCoinUI(coinId) {
+  const card = document.querySelector(`[data-id="${coinId}"]`);
+  if (!card) return;
+
+  const btn = card.querySelector(".fav-btn");
+  const favs = loadFavorites();
+
+  if (favs.includes(coinId)) {
+    btn.classList.add("active");
+    btn.innerHTML = `<i class="fa-solid fa-star"></i>`;
+  } else {
+    btn.classList.remove("active");
+    btn.innerHTML = `<i class="fa-regular fa-star"></i>`;
+  }
+}
+
+// FAVORITES UI
 function renderFavorites() {
   const favList = document.getElementById("favList");
   const favs = loadFavorites();
