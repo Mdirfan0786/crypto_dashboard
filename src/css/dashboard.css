@@ -38,11 +38,6 @@
     box-shadow 0.3s ease;
 }
 
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-}
-
 .card img {
   width: 50px;
   margin: 0 auto 0.5rem;
@@ -168,15 +163,14 @@ canvas {
 .coin-card {
   padding: 1.2rem;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   transition: 0.3s;
   position: relative;
   cursor: pointer;
 }
 
 .coin-card:hover {
-  transform: translateY(-5px);
   box-shadow: 0 0 25px rgba(139, 92, 246, 0.2);
 }
 
@@ -256,13 +250,34 @@ canvas {
 .fav-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
+  color: #64748b;
   cursor: pointer;
+  transition: 0.3s;
 }
 
-.fav-btn:hover {
-  color: #8b5cf6;
+.fav-btn.active {
+  color: #facc15;
+}
+
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ddd;
+  border-top: 4px solid #8b5cf6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 2rem auto;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ================= RESPONSIVE ================= */

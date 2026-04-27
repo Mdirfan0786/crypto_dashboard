@@ -10,7 +10,7 @@
   --bg-color: #f5f7fa;
   --text-color: #111;
   --card-bg: #ffffff;
-  --border-color: #dcdcdc;
+  --border-color: #8b5cf64d;
   --shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 
   --primary: #007bff;
@@ -21,7 +21,7 @@
 body.dark {
   --bg-color: #0f172a;
   --text-color: #f1f5f9;
-  --card-bg: #1e293b;
+  --card-bg: #ffffff08;
   --border-color: #334155;
   --shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 

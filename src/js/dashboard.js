@@ -5,9 +5,13 @@ import {
   loadFavorites,
   removeFavorite,
   convertToINR,
+  formatCompact,
+  showLoader,
+  hideLoader,
 } from "./utils.js";
 
 let chart;
+let allCoins = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   init();
@@ -21,11 +25,13 @@ function init() {
   renderFavorites();
   renderCoins();
 
-  // Search (use keydown instead of keypress)
   search.addEventListener("keydown", async (e) => {
     if (e.key === "Enter") {
       const coin = search.value.trim().toLowerCase();
       if (!coin) return;
+
+      showLoader();
+      results.innerHTML = "";
 
       results.innerHTML = `<div class="spinner"></div>`;
 
@@ -35,46 +41,39 @@ function init() {
         renderChart(coin, data);
       } catch {
         results.innerHTML = `<p class="error">Coin not found</p>`;
+      } finally {
+        hideLoader();
       }
     }
   });
 
-  // Favorites click + remove (better targeting)
   favList.addEventListener("click", async (e) => {
-    const coin = e.target.dataset.id;
-
     if (e.target.classList.contains("remove-btn")) {
-      removeFavorite(coin);
+      removeFavorite(e.target.dataset.id);
       renderFavorites();
       return;
     }
 
     const li = e.target.closest("li");
     if (li) {
-      try {
-        const data = await fetchCoin(li.dataset.id);
-        renderResult(data, results);
-        renderChart(li.dataset.id, data);
-      } catch (err) {
-        console.error(err);
-      }
+      const data = await fetchCoin(li.dataset.id);
+      renderResult(data, results);
+      renderChart(li.dataset.id, data);
     }
   });
 }
 
-// Format helper
 function formatNumber(num) {
   return Number(num).toLocaleString("en-IN");
 }
 
-// Render result
 function renderResult(data, results) {
   const usd = data.market_data.current_price.usd;
   const inr = convertToINR(usd);
 
   results.innerHTML = `
     <div class="card">
-      <img src="${data.image.small}" alt="${data.name}">
+      <img src="${data.image.small}">
       <h2>${data.name} (${data.symbol.toUpperCase()})</h2>
 
       <p>Price: $${formatNumber(usd)}</p>
@@ -86,136 +85,132 @@ function renderResult(data, results) {
     </div>
   `;
 
-  document.getElementById("favBtn").addEventListener("click", () => {
+  document.getElementById("favBtn").onclick = () => {
     const favs = loadFavorites();
-
     if (!favs.includes(data.id)) {
       saveFavorite(data.id);
       renderFavorites();
     }
+  };
+}
+
+async function renderChart(coin, data) {
+  const history = await fetchHistory(coin);
+  const ctx = document.getElementById("priceChart").getContext("2d");
+
+  if (chart) chart.destroy();
+
+  const isPositive = data.market_data.price_change_percentage_24h > 0;
+
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: history.prices.map((p) => new Date(p[0]).toLocaleDateString()),
+      datasets: [
+        {
+          data: history.prices.map((p) => p[1]),
+          borderColor: isPositive ? "green" : "red",
+          tension: 0.3,
+        },
+      ],
+    },
+    options: {
+      plugins: { legend: { display: false } },
+    },
   });
 }
 
-// Render chart
-async function renderChart(coin, data) {
-  try {
-    const history = await fetchHistory(coin);
-    const ctx = document.getElementById("priceChart").getContext("2d");
-
-    if (chart) chart.destroy();
-
-    const isPositive = data.market_data.price_change_percentage_24h > 0;
-
-    chart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: history.prices.map((p) => new Date(p[0]).toLocaleDateString()),
-        datasets: [
-          {
-            label: `${coin} Price`,
-            data: history.prices.map((p) => p[1]),
-            borderColor: isPositive ? "green" : "red",
-            tension: 0.3,
-          },
-        ],
-      },
-      options: {
-        plugins: {
-          legend: { display: false },
-        },
-        scales: {
-          x: {
-            ticks: { color: "#94a3b8" },
-            grid: { color: "rgba(255,255,255,0.05)" },
-          },
-          y: {
-            ticks: { color: "#94a3b8" },
-            grid: { color: "rgba(255,255,255,0.05)" },
-          },
-        },
-      },
-    });
-  } catch (err) {
-    console.error("Chart Error:", err);
-  }
-}
-
-// render Coins
 async function renderCoins() {
   const grid = document.getElementById("coinsGrid");
   if (!grid) return;
 
+  showLoader();
+  grid.innerHTML = "";
+
   try {
-    const coins = await fetchCoins();
+    if (allCoins.length === 0) {
+      allCoins = await fetchCoins();
+    }
+
+    const coins = allCoins;
 
     grid.innerHTML = coins
       .map((coin) => {
         const change = coin.price_change_percentage_24h ?? 0;
+        const favs = loadFavorites();
+        const isFav = favs.includes(coin.id);
 
         return `
-          <div class="coin-card" data-id="${coin.id}">
-            
-            <div class="card-header">
-              <div class="coin-info">
-                <img src="${coin.image}" />
-                <div>
-                  <h3>${coin.name}</h3>
-                  <span>${coin.symbol.toUpperCase()}</span>
-                </div>
-              </div>
-
-              <button class="fav-btn" data-id="${coin.id}">☆</button>
-            </div>
-
-            <h2 class="price">$${formatNumber(coin.current_price)}</h2>
-
-            <div class="change ${change > 0 ? "green" : "red"}">
-              ${change > 0 ? "▲" : "▼"} ${change.toFixed(2)}%
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="card-footer">
+        <div class="coin-card" data-id="${coin.id}">
+          
+          <div class="card-header">
+            <div class="coin-info">
+              <img src="${coin.image}">
               <div>
-                <span>MKT CAP</span>
-                <p>$${formatNumber(coin.market_cap)}</p>
-              </div>
-
-              <div>
-                <span>VOLUME</span>
-                <p>$${formatNumber(coin.total_volume)}</p>
-              </div>
-
-              <div>
-                <span>RANK</span>
-                <p>#${coin.market_cap_rank}</p>
+                <h3>${coin.name}</h3>
+                <span>${coin.symbol.toUpperCase()}</span>
               </div>
             </div>
 
+            <button class="fav-btn ${isFav ? "active" : ""}" data-id="${coin.id}">
+              <i class="${
+                isFav ? "fa-solid fa-star" : "fa-regular fa-star"
+              }"></i>
+            </button>
           </div>
-        `;
+
+          <h2 class="price">$${formatNumber(coin.current_price)}</h2>
+
+          <div class="change ${change > 0 ? "green" : "red"}">
+            ${change > 0 ? "▲" : "▼"} ${change.toFixed(2)}%
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="card-footer">
+            <div>
+              <span>MKT CAP</span>
+              <p>$${formatCompact(coin.market_cap)}</p>
+            </div>
+
+            <div>
+              <span>VOLUME</span>
+              <p>$${formatCompact(coin.total_volume)}</p>
+            </div>
+
+            <div>
+              <span>RANK</span>
+              <p>#${coin.market_cap_rank}</p>
+            </div>
+          </div>
+        </div>
+      `;
       })
       .join("");
 
-    // click handling
-    grid.addEventListener("click", async (e) => {
-      const coinId = e.target.dataset.id;
+    if (!grid.dataset.listener) {
+      grid.dataset.listener = "true";
 
-      // favorite click
-      if (e.target.classList.contains("fav-btn")) {
-        const favs = loadFavorites();
+      grid.addEventListener("click", async (e) => {
+        const favBtn = e.target.closest(".fav-btn");
 
-        if (!favs.includes(coinId)) {
-          saveFavorite(coinId);
+        if (favBtn) {
+          const coinId = favBtn.dataset.id;
+          const favs = loadFavorites();
+
+          if (favs.includes(coinId)) {
+            removeFavorite(coinId);
+          } else {
+            saveFavorite(coinId);
+          }
+
           renderFavorites();
+          renderCoins();
+          return;
         }
-        return;
-      }
 
-      // card click
-      const card = e.target.closest(".coin-card");
-      if (card) {
-        try {
+        const card = e.target.closest(".coin-card");
+        if (card) {
           const data = await fetchCoin(card.dataset.id);
           const results = document.getElementById("results");
 
@@ -223,18 +218,17 @@ async function renderCoins() {
           renderChart(card.dataset.id, data);
 
           window.scrollTo({ top: 0, behavior: "smooth" });
-        } catch (err) {
-          console.error(err);
         }
-      }
-    });
+      });
+    }
   } catch (err) {
-    console.error("REAL ERROR:", err);
+    console.error(err);
     grid.innerHTML = "Failed to load coins";
+  } finally {
+    hideLoader();
   }
 }
 
-// Render favorites
 function renderFavorites() {
   const favList = document.getElementById("favList");
   const favs = loadFavorites();
